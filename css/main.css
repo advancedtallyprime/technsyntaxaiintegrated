@@ -1,0 +1,1012 @@
+/* ==========================================================================
+   Tech'nSyntax — Main Stylesheet
+   Design system: tokens, base, layout, components
+   ========================================================================== */
+
+/* --- Design Tokens ------------------------------------------------------ */
+:root {
+  /* Brand colors (per brand guideline) */
+  --color-primary: #2563EB;
+  --color-primary-dark: #1D4ED8;
+  --color-secondary: #06B6D4;
+  --color-dark: #0F172A;
+  --color-bg: #F8FAFC;
+  --color-text: #1E293B;
+
+  /* Supporting neutrals */
+  --color-text-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F1F5F9;
+
+  /* Syntax-highlight accent set (used sparingly, hero code panel + badges) */
+  --syntax-keyword: #93C5FD;
+  --syntax-string: #6EE7B7;
+  --syntax-comment: #64748B;
+  --syntax-function: #FCD34D;
+
+  /* Typography */
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+  /* Type scale — mobile-first base (smallest). Scaled up progressively
+     for tablet (768px+) and desktop (1200px+) in responsive.css. */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.05rem;
+  --fs-lg: 1.2rem;
+  --fs-xl: 1.4rem;
+  --fs-2xl: 1.6rem;
+  --fs-3xl: 1.9rem;
+  --fs-4xl: 2.3rem;
+
+  /* Spacing — mobile-first base (tightest). Grows at larger breakpoints. */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+  --space-xl: 2.75rem;
+  --space-2xl: 3.5rem;
+
+  /* Layout */
+  --max-width: 1200px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.12);
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration: 0.3s;
+}
+
+/* --- Reset & Base --------------------------------------------------------*/
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html, body {
+  /* Deliberately NOT setting overflow-x:hidden here. It looks like a
+     harmless safety net against stray horizontal scroll, but in most
+     browsers position:sticky stops working on any descendant (like the
+     header) the moment html/body has any overflow value other than
+     visible — the header would just scroll away instead of sticking.
+     The actual overflow bugs this used to paper over (a CSS Grid
+     "blowout" in the hero, and a padding conflict on .nav/.page-header)
+     are fixed at their source now, so this is safe to leave as the
+     default. */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--fs-base);
+  line-height: 1.65;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+ul, ol { list-style: none; margin: 0; padding: 0; }
+
+button { font-family: inherit; cursor: pointer; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 var(--space-sm);
+  color: var(--color-dark);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: var(--fs-4xl); font-weight: 800; }
+h2 { font-size: var(--fs-3xl); font-weight: 800; }
+h3 { font-size: var(--fs-xl); font-weight: 700; }
+h4 { font-size: var(--fs-md); font-weight: 600; }
+
+p { margin: 0 0 var(--space-sm); color: var(--color-text-muted); }
+
+/* Visible keyboard focus */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 10px 18px;
+  z-index: 1000;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+/* --- Layout helpers ------------------------------------------------------*/
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.section { padding: var(--space-2xl) 0; }
+.section--tight { padding: var(--space-xl) 0; }
+.section--alt { background: var(--color-surface-alt); }
+.section--dark {
+  background: var(--color-dark);
+  color: #CBD5E1;
+}
+.section--dark h2, .section--dark h3, .section--dark h4 { color: #fff; }
+
+.grid { display: grid; gap: var(--space-md); }
+/* Mobile-first base: single column. Enhanced to 2/3/4 columns at tablet
+   and desktop breakpoints in responsive.css. */
+.grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; }
+
+/* --- Eyebrow / code-comment label (signature motif) -----------------------*/
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.08);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.01em;
+}
+.eyebrow::before { content: "//"; color: var(--color-secondary); font-weight: 600; }
+.section--dark .eyebrow {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--syntax-string);
+}
+
+.section-head {
+  max-width: 640px;
+  margin: 0 auto var(--space-lg);
+  text-align: center;
+}
+.section-head p { font-size: var(--fs-md); }
+
+/* --- Buttons ---------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: var(--fs-base);
+  border: 1.5px solid transparent;
+  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), background var(--duration) var(--ease), color var(--duration) var(--ease);
+  text-align: center;
+  /* Long labels (e.g. "Get a Recommendation") are allowed to wrap on
+     narrow screens instead of forcing horizontal overflow. */
+  white-space: normal;
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+.btn--primary:hover { background: var(--color-primary-dark); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.36); }
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-dark);
+  border-color: var(--color-border);
+}
+.btn--secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+.btn--ghost-light {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-color: rgba(255,255,255,0.25);
+}
+.btn--ghost-light:hover { background: rgba(255,255,255,0.16); }
+
+.btn--sm { padding: 10px 18px; font-size: var(--fs-sm); }
+.btn--full { width: 100%; }
+
+/* --- Header / Navigation ------------------------------------------------ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  /* No backdrop-filter here: it creates a new CSS containing block for
+     any position:fixed descendant (including the mobile .nav-links
+     off-canvas panel), which broke the panel's full-viewport sizing —
+     it was being measured against this small header box instead of the
+     actual viewport. A slightly-opaque background still gives a subtle
+     glassy look without that side effect. */
+  background: rgba(248, 250, 252, 0.92);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease), background var(--duration) var(--ease);
+}
+.header.is-scrolled {
+  border-bottom-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Longhand (not shorthand "padding: 18px 0") — this element also
+     carries the .container class for its horizontal padding. A
+     shorthand here would reset padding-left/right to 0 and silently
+     wipe out .container's padding, since both are single-class
+     selectors and this rule comes later in the cascade. */
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-lg);
+  color: var(--color-dark);
+  /* Vertical padding brings the clickable area to the 44px minimum
+     recommended touch target size, not just the visible text height. */
+  padding: 9px 0;
+}
+.logo .logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+.logo .logo-dot { color: var(--color-secondary); }
+
+.nav-links {
+  /* Mobile-first base: the nav lives in an off-canvas panel by default.
+     Reset to a static horizontal row at the desktop nav breakpoint
+     (960px+) in responsive.css. */
+  position: fixed;
+  top: 0;
+  right: 0;
+  /* Anchoring to top:0 AND bottom:0 (rather than setting an explicit
+     height: 100vh/100dvh) lets the browser compute the panel's height
+     directly from the actual visual viewport edges. This is more
+     reliable than vh/dvh units, which can still misbehave or fail to
+     recalculate correctly across different mobile browsers as the
+     address bar shows/hides — leaving a gap at the bottom where page
+     content shows through under the panel. Anchored edges can't do that:
+     the box is defined as "from viewport top to viewport bottom",
+     full stop. */
+  bottom: 0;
+  width: min(320px, 84vw);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-md);
+  padding: 96px var(--space-md) var(--space-md);
+  /* Belt-and-braces: if content is ever still taller than the available
+     height (very short viewports, landscape phones), scroll within the
+     panel instead of silently clipping the bottom items. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: transform var(--duration) var(--ease);
+  z-index: 400;
+}
+.nav-links.is-open { transform: translateX(0); }
+.nav-links a {
+  font-size: var(--fs-md);
+  width: 100%;
+  font-weight: 500;
+  color: var(--color-text);
+  position: relative;
+  /* Minimum 44px touch target (WCAG 2.5.5 / mobile platform guidance) —
+     the default 6px vertical padding left links around 32px tall. */
+  padding: 13px 4px;
+  display: block;
+  transition: color var(--duration) var(--ease);
+}
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration) var(--ease);
+}
+.nav-links a:hover { color: var(--color-primary); }
+.nav-links a:hover::after,
+.nav-links a.is-active::after { transform: scaleX(1); }
+.nav-links a.is-active { color: var(--color-primary); }
+
+/* Mobile-first base: no CTA button in the static header bar — it lives
+   inside the mobile nav panel instead (.nav-cta-mobile). Swaps at the
+   desktop nav breakpoint (960px+) in responsive.css. */
+.nav-cta { display: none; align-items: center; gap: var(--space-sm); }
+.nav-cta-mobile { display: flex; margin-top: var(--space-md); width: 100%; }
+
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration) var(--ease), visibility var(--duration) var(--ease);
+  z-index: 390;
+}
+.nav-overlay.is-open { opacity: 1; visibility: visible; }
+
+.hamburger {
+  /* Mobile-first base: visible. Hidden at the desktop nav breakpoint
+     (960px+) in responsive.css. Explicit stacking context (position +
+     z-index higher than .nav-links) so the button always stays on top
+     and clickable — otherwise the open off-canvas panel can visually
+     cover it, and a second tap meant to close the menu never reaches it. */
+  display: flex;
+  position: relative;
+  z-index: 410;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--color-dark);
+  margin: 0 auto;
+  transition: transform var(--duration) var(--ease), opacity var(--duration) var(--ease);
+}
+.hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* --- Hero ----------------------------------------------------------------*/
+.hero {
+  padding: var(--space-2xl) 0;
+  overflow: hidden;
+  position: relative;
+  background-image:
+    linear-gradient(180deg, rgba(248,250,252,0.58), rgba(248,250,252,0.72)),
+    url('../images/hero/hero-main.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Mobile-first base: single stacked column, centered text. Splits into
+   a two-column layout at the desktop breakpoint (1200px+) in
+   responsive.css. */
+.hero .container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+.hero-copy { text-align: center; min-width: 0; }
+.hero-copy h1 { margin-bottom: var(--space-md); }
+.hero-copy .lead { font-size: var(--fs-md); max-width: 46ch; margin-left: auto; margin-right: auto; }
+/* Mobile-first base: stacked, full-width buttons. */
+.hero-actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-sm); margin-top: var(--space-lg); }
+.hero-actions .btn { width: 100%; }
+
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+.hero-stat .num {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  color: var(--color-dark);
+  display: block;
+}
+.hero-stat .label { font-size: var(--fs-xs); color: var(--color-text-muted); }
+
+/* Code editor panel — signature element. Mobile-first base: no rotation,
+   centered, capped width so it reads clearly on small screens. Rotated
+   and widened at the desktop breakpoint (1200px+) in responsive.css. */
+.code-panel {
+  background: var(--color-dark);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: none;
+  max-width: 480px;
+  min-width: 0;
+  width: 100%;
+  margin: 0 auto;
+}
+.code-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: #1E293B;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot--r { background: #F87171; }
+.code-dot--y { background: #FBBF24; }
+.code-dot--g { background: #34D399; }
+.code-panel-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: #94A3B8;
+  margin-left: 8px;
+}
+.code-panel-body {
+  padding: 24px 22px 30px;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1.9;
+  min-height: 260px;
+  /* Code lines never wrap mid-line (matches real editor behavior); if a
+     line is too long for the viewport the panel scrolls horizontally
+     within itself instead of overflowing the page layout. */
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.code-panel-body .ln { color: #475569; display: inline-block; width: 22px; user-select: none; }
+.tok-comment { color: var(--syntax-comment); }
+.tok-keyword { color: var(--syntax-keyword); }
+.tok-string { color: var(--syntax-string); }
+.tok-function { color: var(--syntax-function); }
+.tok-plain { color: #E2E8F0; }
+.code-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  background: var(--color-secondary);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Grid item — min-width:0 overrides the browser's default min-width:auto,
+   which otherwise lets the code panel's unshrinkable (nowrap) content
+   force this whole column wider than the viewport ("grid blowout"). */
+.hero-visual { min-width: 0; }
+
+.hero-visual-float {
+  position: absolute;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 12px 16px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Cards ---------------------------------------------------------------*/
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+.service-card .service-media {
+  aspect-ratio: 16/10;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-alt);
+  margin-bottom: var(--space-sm);
+}
+.service-card .service-media img { width: 100%; height: 100%; object-fit: cover; }
+.service-card .service-index {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+.service-card ul { margin-top: var(--space-xs); }
+.service-card ul li {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  padding: 4px 0 4px 20px;
+  position: relative;
+}
+.service-card ul li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 12px;
+  width: 8px; height: 1.5px;
+  background: var(--color-secondary);
+}
+.service-card .service-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-sm);
+  padding: 8px 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.service-card .service-link .arrow { transition: transform var(--duration) var(--ease); }
+.service-card:hover .service-link .arrow { transform: translateX(4px); }
+
+/* Value / feature cards */
+.value-card { text-align: left; }
+.value-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* Portfolio */
+.portfolio-card { padding: 0; overflow: hidden; }
+.portfolio-media { aspect-ratio: 4/3; background: var(--color-surface-alt); overflow: hidden; }
+.portfolio-media img { width: 100%; height: 100%; object-fit: cover; }
+.portfolio-body { padding: var(--space-md); }
+.tag-list { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 0; }
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+/* Blog */
+.blog-card { padding: 0; overflow: hidden; }
+.blog-media { aspect-ratio: 16/9; background: var(--color-surface-alt); overflow: hidden; }
+.blog-media img { width: 100%; height: 100%; object-fit: cover; }
+.blog-body { padding: var(--space-md); }
+.blog-cat {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.blog-meta {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-sm);
+}
+
+/* --- CTA band --------------------------------------------------------- */
+.cta-band {
+  background: linear-gradient(120deg, var(--color-dark), #1E3A8A 65%, var(--color-primary));
+  border-radius: var(--radius-lg);
+  /* Mobile-first base: tighter padding. Grows at tablet+ in responsive.css. */
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.cta-band h2 { color: #fff; }
+.cta-band p { color: #CBD5E1; max-width: 50ch; margin-left: auto; margin-right: auto; }
+.cta-actions {
+  display: flex;
+  /* Mobile-first base: stacked, full-width buttons. Row at tablet+. */
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+.cta-actions .btn { width: 100%; }
+
+/* --- Footer ------------------------------------------------------------- */
+.footer {
+  background: var(--color-dark);
+  color: #94A3B8;
+  padding: var(--space-xl) 0 var(--space-md);
+}
+.footer-grid {
+  display: grid;
+  /* Mobile-first base: single column. Enhanced to 2 then 4 columns at
+     tablet and desktop breakpoints in responsive.css. */
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.footer .logo { color: #fff; }
+.footer-desc { font-size: var(--fs-sm); max-width: 32ch; margin-top: var(--space-sm); }
+.footer-social {
+  display: flex;
+  /* 7 icons at 44px each won't fit in one row on a narrow mobile footer
+     column — wrap instead of overflowing. */
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: var(--space-md);
+}
+.footer-social a {
+  width: 44px; height: 44px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+.footer-social a i {
+  /* Icon fonts inherit the page's line-height (1.65) by default, which
+     gives the <i> element a box noticeably taller than the glyph itself
+     — the flex parent centers that oversized box, not the visible glyph,
+     so the icon can look visually off-center even though the CSS
+     centering is technically correct. Collapsing to line-height:1 makes
+     the element's box hug the glyph tightly for accurate centering. */
+  line-height: 1;
+  display: block;
+}
+.footer-social a:hover { background: var(--color-primary); color: #fff; }
+.footer-col h4 { color: #fff; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-sm); }
+.footer-col ul li { margin-bottom: 2px; }
+/* Scoped to .footer-col ul a (not the broader .footer-col a) so this
+   rule only targets the actual link lists (About/Portfolio/Blog/...).
+   The wider selector previously also matched the brand .logo link,
+   which sits directly in the first .footer-col outside any <ul> — its
+   higher specificity (.footer-col a = 2 classes) was silently
+   overriding .logo's own "display: flex", breaking the icon/text
+   flex alignment. */
+.footer-col ul a {
+  font-size: var(--fs-sm);
+  display: inline-block;
+  padding: 8px 0;
+  transition: color var(--duration) var(--ease);
+}
+.footer-col ul a:hover { color: #fff; }
+.footer-bottom {
+  display: flex;
+  /* Mobile-first base: stacked. Row layout at tablet+ in responsive.css. */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: var(--space-md);
+  font-size: var(--fs-xs);
+}
+
+/* --- Scroll to top -------------------------------------------------------*/
+.scroll-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity var(--duration) var(--ease), transform var(--duration) var(--ease), visibility var(--duration) var(--ease);
+  z-index: 400;
+}
+.scroll-top.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
+
+/* Hidden while the mobile nav panel is open so the two floating controls
+   never visually collide or compete for the same tap area. */
+.scroll-top.is-hidden-by-menu { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
+
+/* --- Page header (interior pages) -----------------------------------------*/
+.page-header {
+  /* Longhand — this element also carries the .container class for its
+     horizontal padding; see the .nav rule above for why shorthand
+     padding here would silently override it. */
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  text-align: center;
+}
+.page-header .eyebrow { display: inline-flex; }
+.breadcrumb {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+.breadcrumb a { color: var(--color-primary); display: inline-block; padding: 8px 0; }
+
+/* --- Forms ---------------------------------------------------------------*/
+.form-group { margin-bottom: var(--space-md); }
+.form-group label {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--color-dark);
+}
+.form-group .required { color: var(--color-primary); }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+.form-group textarea { resize: vertical; min-height: 130px; }
+.form-error {
+  display: none;
+  font-size: var(--fs-xs);
+  color: #DC2626;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+}
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea { border-color: #DC2626; }
+.form-group.has-error .form-error { display: block; }
+.form-success {
+  display: none;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid var(--color-secondary);
+  color: #0E7490;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  font-size: var(--fs-sm);
+}
+.form-success.is-visible { display: block; }
+
+.contact-info-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.contact-info-item:last-child { border-bottom: none; }
+.contact-info-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* --- Image placeholder fallback ------------------------------------------
+   All /images/*.webp files ship as empty placeholder files (per project
+   spec — no images were generated). Rather than showing the browser's
+   broken-image icon, main.js detects the load failure and applies this
+   class to the image's container so a clean, on-brand placeholder shows
+   instead. Swap in real images at the same filenames and this never
+   triggers. --------------------------------------------------------------*/
+.img-placeholder {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.img-placeholder::before {
+  content: "◇";
+  display: block;
+  font-size: 1.4rem;
+  color: var(--color-border);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 14px));
+}
+.img-placeholder::after {
+  content: attr(data-img-label);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-sm);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 10px));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+/* --- Scroll reveal base (JS toggles .is-in-view) -----------------------*/
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.is-in-view { opacity: 1; transform: translateY(0); }
+
+/* --- Misc utility ----------------------------------------------------- */
+.text-center { text-align: center; }
+.mt-lg { margin-top: var(--space-lg); }
+.mb-0 { margin-bottom: 0; }
+.divider { height: 1px; background: var(--color-border); border: none; margin: var(--space-lg) 0; }
+
+/* --- Contact page: custom AI chat (replaces contact form) -------------- */
+.ai-chat {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 480px;
+  max-height: 70vh;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  background: var(--color-bg-alt, #f7f8fa);
+}
+.ai-chat-messages {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-md, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-chat-bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  line-height: 1.45;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.ai-chat-bubble--agent {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
+  color: var(--color-text, #1a1a2e);
+}
+.ai-chat-bubble--user {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.ai-chat-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+}
+.ai-chat-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-muted, #9aa0ab);
+  animation: ai-chat-typing-bounce 1.2s infinite ease-in-out;
+}
+.ai-chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ai-chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ai-chat-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.ai-chat-status {
+  min-height: 18px;
+  padding: 0 var(--space-md, 16px);
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #9aa0ab);
+}
+.ai-chat-status.is-error { color: #d9534f; }
+.ai-chat-form {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  padding: var(--space-sm, 10px) var(--space-md, 16px) var(--space-md, 16px);
+  border-top: 1px solid var(--color-border);
+  background: #fff;
+}
+.ai-chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  font-size: 0.95rem;
+  outline: none;
+}
+.ai-chat-input:focus { border-color: var(--color-primary); }
+.ai-chat-send {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.ai-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* WhatsApp icon sized to match the other contact-info-icon glyphs */
+.contact-info-icon .fa-whatsapp { font-size: 1.1rem; }

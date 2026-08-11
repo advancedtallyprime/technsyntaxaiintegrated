@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Tech'nSyntax</title>
+  <meta name="description" content="Technology insights from Tech'nSyntax on programming, web development, data analytics, AI and career growth.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.technsyntax.site/blog.html">
+  <meta name="theme-color" content="#2563EB">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Tech'nSyntax">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Blog — Tech'nSyntax">
+  <meta property="og:description" content="Notes on programming, web development, analytics, AI and building a career in tech.">
+  <meta property="og:url" content="https://www.technsyntax.site/blog.html">
+  <meta property="og:image" content="https://www.technsyntax.site/images/og/og-image.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tech'nSyntax Blog">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Blog — Tech'nSyntax">
+  <meta name="twitter:description" content="Notes on programming, web development, analytics, AI and building a career in tech.">
+  <meta name="twitter:image" content="https://www.technsyntax.site/images/og/og-image.webp">
+  <meta name="twitter:image:alt" content="Tech'nSyntax Blog">
+
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Structured data: Blog + posts. No dates or author bylines are
+       invented — Google's structured-data guidelines discourage
+       placeholder values, so these fields are added once real posts
+       have known publish dates. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.technsyntax.site/#organization",
+        "name": "Tech'nSyntax",
+        "url": "https://www.technsyntax.site/",
+        "logo": "https://www.technsyntax.site/icons/favicon.svg",
+        "sameAs": [
+          "https://www.facebook.com/TheTechnSyntax",
+          "https://www.instagram.com/TheTechnSyntax",
+          "https://www.x.com/TheTechnSyntax",
+          "https://www.youtube.com/@TheTechnSyntax",
+          "https://www.linkedin.com/company/TechnSyntax",
+          "https://www.reddit.com/r/TheTechnSyntax",
+          "https://TheTechnSyntax.quora.com"
+        ]
+      },
+      {
+        "@type": "Blog",
+        "@id": "https://www.technsyntax.site/blog.html#blog",
+        "name": "Tech'nSyntax Technology Blog",
+        "url": "https://www.technsyntax.site/blog.html",
+        "publisher": { "@id": "https://www.technsyntax.site/#organization" },
+        "blogPost": [
+          { "@type": "BlogPosting", "headline": "Writing JavaScript That Ages Well", "description": "Small habits that keep vanilla JS codebases readable as they grow.", "author": { "@id": "https://www.technsyntax.site/#organization" } },
+          { "@type": "BlogPosting", "headline": "Responsive Design Beyond Breakpoints", "description": "Why fluid layouts often outperform a long list of fixed breakpoints.", "author": { "@id": "https://www.technsyntax.site/#organization" } },
+          { "@type": "BlogPosting", "headline": "Dashboards People Actually Open", "description": "Designing business reports around the questions people actually ask.", "author": { "@id": "https://www.technsyntax.site/#organization" } },
+          { "@type": "BlogPosting", "headline": "Where AI Automation Actually Pays Off", "description": "A practical framework for spotting tasks worth automating with AI.", "author": { "@id": "https://www.technsyntax.site/#organization" } },
+          { "@type": "BlogPosting", "headline": "Breaking Into Tech Without a CS Degree", "description": "What actually moves the needle when you're learning to code later in life.", "author": { "@id": "https://www.technsyntax.site/#organization" } },
+          { "@type": "BlogPosting", "headline": "SQL Habits Every Analyst Should Know", "description": "Query patterns that save hours once your datasets start growing.", "author": { "@id": "https://www.technsyntax.site/#organization" } }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    .blog-filters { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: var(--space-lg); }
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      padding: 10px 18px;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 100px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      transition: all var(--duration) var(--ease);
+    }
+    .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .filter-btn.is-active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="header">
+    <nav class="nav container" aria-label="Primary navigation">
+      <a href="index.html" class="logo">
+        <img src="icons/favicon.svg" alt="" class="logo-mark" width="34" height="34">
+        <span class="logo-text">Tech<span class="logo-dot">'n</span>Syntax</span>
+      </a>
+      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="portfolio.html">Portfolio</a></li>
+        <li><a href="academy.html">Academy</a></li>
+        <li><a href="blog.html" class="is-active">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-cta-mobile"><a href="contact.html" class="btn btn--primary btn--full">Start Project</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn--primary btn--sm">Start Project</a>
+      </div>
+    </nav>
+    <div class="nav-overlay"></div>
+  </header>
+
+  <main id="main">
+
+    <section class="page-header container">
+      <p class="breadcrumb"><a href="index.html">Home</a> / Blog</p>
+      <span class="eyebrow">blog.posts</span>
+      <h1>Technology Blog</h1>
+      <p class="section-head" style="margin-top:var(--space-sm);">Notes on programming, web development, analytics, AI and building a career in tech.</p>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <nav class="blog-filters" aria-label="Blog categories">
+          <button class="filter-btn is-active">All</button>
+          <button class="filter-btn">Programming</button>
+          <button class="filter-btn">Web Development</button>
+          <button class="filter-btn">Analytics</button>
+          <button class="filter-btn">AI</button>
+          <button class="filter-btn">Career</button>
+        </nav>
+
+        <div class="grid grid--3">
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-1.webp" alt="Programming blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">Programming</span>
+              <h3>Writing JavaScript That Ages Well</h3>
+              <p>Small habits that keep vanilla JS codebases readable as they grow.</p>
+              <div class="blog-meta"><span>5 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-2.webp" alt="Web development blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">Web Development</span>
+              <h3>Responsive Design Beyond Breakpoints</h3>
+              <p>Why fluid layouts often outperform a long list of fixed breakpoints.</p>
+              <div class="blog-meta"><span>6 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-3.webp" alt="Analytics blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">Analytics</span>
+              <h3>Dashboards People Actually Open</h3>
+              <p>Designing business reports around the questions people actually ask.</p>
+              <div class="blog-meta"><span>4 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-4.webp" alt="AI blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">AI</span>
+              <h3>Where AI Automation Actually Pays Off</h3>
+              <p>A practical framework for spotting tasks worth automating with AI.</p>
+              <div class="blog-meta"><span>7 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-5.webp" alt="Career blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">Career</span>
+              <h3>Breaking Into Tech Without a CS Degree</h3>
+              <p>What actually moves the needle when you're learning to code later in life.</p>
+              <div class="blog-meta"><span>5 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+
+          <article class="card blog-card reveal">
+            <div class="blog-media"><img src="images/blog/blog-6.webp" alt="Programming blog post placeholder"></div>
+            <div class="blog-body">
+              <span class="blog-cat">Programming</span>
+              <h3>SQL Habits Every Analyst Should Know</h3>
+              <p>Query patterns that save hours once your datasets start growing.</p>
+              <div class="blog-meta"><span>6 min read</span><span>·</span><span>Tech'nSyntax Team</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="index.html" class="logo">
+            <img src="icons/favicon.svg" alt="" class="logo-mark" width="34" height="34">
+            <span class="logo-text">Tech<span class="logo-dot">'n</span>Syntax</span>
+          </a>
+          <p class="footer-desc">Digital transformation services and practical technical education for growing businesses.</p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/TheTechnSyntax" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+            <a href="https://www.instagram.com/TheTechnSyntax" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+            <a href="https://www.x.com/TheTechnSyntax" aria-label="Twitter / X" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
+            <a href="https://www.youtube.com/@TheTechnSyntax" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>
+            <a href="https://www.linkedin.com/company/TechnSyntax" aria-label="LinkedIn" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+            <a href="https://www.reddit.com/r/TheTechnSyntax" aria-label="Reddit" target="_blank" rel="noopener"><i class="fa-brands fa-reddit-alien" aria-hidden="true"></i></a>
+            <a href="https://TheTechnSyntax.quora.com" aria-label="Quora" target="_blank" rel="noopener"><i class="fa-brands fa-quora" aria-hidden="true"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="services.html#web-development">Web Development</a></li>
+            <li><a href="services.html#data-analytics">Data Analytics</a></li>
+            <li><a href="services.html#ai-solutions">AI Solutions</a></li>
+            <li><a href="academy.html">Academy</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:info@technsyntax.site">info@technsyntax.site</a></li>
+            <li><span>Remote-first, worldwide</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span class="js-year">2026</span> Tech'nSyntax. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <button class="scroll-top" aria-label="Scroll to top">↑</button>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Simple client-side category filter (no backend)
+    document.addEventListener('DOMContentLoaded', function () {
+      var buttons = document.querySelectorAll('.filter-btn');
+      var cards = document.querySelectorAll('.blog-card');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          buttons.forEach(function (b) { b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+          var category = btn.textContent.trim();
+          cards.forEach(function (card) {
+            var cat = card.querySelector('.blog-cat').textContent.trim();
+            var show = category === 'All' || category === cat;
+            card.style.display = show ? '' : 'none';
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+/* ==========================================================================
+   Tech'nSyntax — Responsive Stylesheet (Mobile-First)
+   Base styles in main.css target the smallest phones (320px). Everything
+   below progressively ENHANCES the layout as more viewport width becomes
+   available, using min-width queries only — nothing here is ever
+   "collapsed down" for mobile, because mobile already is the foundation.
+
+   Breakpoints:
+     (base)   0px+     Mobile   — single column, off-canvas nav
+     --sm     540px+   Large phone — minor type/spacing bump
+     --md     768px+   Tablet   — 2-column grids, row-based controls
+     --nav    960px+   Desktop nav — horizontal nav replaces hamburger
+     --lg     1200px+  Desktop  — full multi-column layouts, hero split
+   ========================================================================== */
+
+/* ==========================================================================
+   540px+  — Large phone: a little breathing room before tablet
+   ========================================================================== */
+@media (min-width: 540px) {
+  .hero-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-actions .btn { width: auto; }
+
+  .cta-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cta-actions .btn { width: auto; }
+}
+
+/* ==========================================================================
+   768px+  — Tablet: two-column grids, larger type, row-based footer bottom
+   ========================================================================== */
+@media (min-width: 768px) {
+  :root {
+    --fs-md: 1.125rem;
+    --fs-lg: 1.375rem;
+    --fs-xl: 1.6rem;
+    --fs-2xl: 1.9rem;
+    --fs-3xl: 2.35rem;
+    --fs-4xl: 3rem;
+    --space-md: 1.5rem;
+    --space-lg: 2.5rem;
+    --space-xl: 3.25rem;
+    --space-2xl: 4.5rem;
+  }
+
+  .grid--2, .grid--3, .grid--4 { grid-template-columns: repeat(2, 1fr); }
+
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-bottom { flex-direction: row; justify-content: space-between; align-items: center; }
+
+  .cta-band { padding: var(--space-xl); }
+
+  .scroll-top { right: 24px; bottom: 24px; width: 46px; height: 46px; }
+}
+
+/* ==========================================================================
+   960px+  — Desktop navigation: swap the off-canvas mobile menu for a
+   standard horizontal nav bar. A dedicated breakpoint because the nav
+   needs meaningfully more width than the general tablet layout does.
+   ========================================================================== */
+@media (min-width: 960px) {
+  .hamburger { display: none; }
+
+  .nav-links {
+    position: static;
+    height: auto;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+  }
+  .nav-links a {
+    width: auto;
+    font-size: var(--fs-sm);
+    padding: 6px 2px;
+  }
+
+  .nav-cta { display: flex; }
+  .nav-cta-mobile { display: none; }
+
+  .nav-overlay { display: none; }
+}
+
+/* ==========================================================================
+   1200px+  — Desktop: hero splits into two columns, full multi-column
+   grids, footer expands to four columns, code panel gets its signature
+   rotation.
+   ========================================================================== */
+@media (min-width: 1200px) {
+  .hero .container { grid-template-columns: 1.05fr 0.95fr; }
+  .hero-copy { text-align: left; }
+  .hero-copy .lead { margin-left: 0; margin-right: 0; }
+  .hero-actions, .cta-actions { justify-content: flex-start; }
+  .cta-actions { justify-content: center; }
+  .hero-stats { justify-content: flex-start; }
+
+  .code-panel { transform: rotate(1.2deg); max-width: none; margin: 0; }
+
+  .grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+  .footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1.2fr; }
+}

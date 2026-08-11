@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech'nSyntax Academy — Technical Training</title>
+  <meta name="description" content="Tech'nSyntax Academy offers practical courses in web development, data analytics, SQL, Power BI, AI tools and UI/UX design, with certification.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.technsyntax.site/academy.html">
+  <meta name="theme-color" content="#2563EB">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Tech'nSyntax">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Tech'nSyntax Academy — Technical Training">
+  <meta property="og:description" content="Practical, instructor-built courses in web development, data analytics, SQL, Power BI, AI tools and UI/UX design — with certification.">
+  <meta property="og:url" content="https://www.technsyntax.site/academy.html">
+  <meta property="og:image" content="https://www.technsyntax.site/images/og/og-image.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tech'nSyntax Academy">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tech'nSyntax Academy — Technical Training">
+  <meta name="twitter:description" content="Practical courses in web development, data analytics, SQL, Power BI, AI tools and UI/UX design — with certification.">
+  <meta name="twitter:image" content="https://www.technsyntax.site/images/og/og-image.webp">
+  <meta name="twitter:image:alt" content="Tech'nSyntax Academy">
+
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Structured data: EducationalOrganization + Course list -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.technsyntax.site/#organization",
+        "name": "Tech'nSyntax",
+        "url": "https://www.technsyntax.site/",
+        "logo": "https://www.technsyntax.site/icons/favicon.svg",
+        "sameAs": [
+          "https://www.facebook.com/TheTechnSyntax",
+          "https://www.instagram.com/TheTechnSyntax",
+          "https://www.x.com/TheTechnSyntax",
+          "https://www.youtube.com/@TheTechnSyntax",
+          "https://www.linkedin.com/company/TechnSyntax",
+          "https://www.reddit.com/r/TheTechnSyntax",
+          "https://TheTechnSyntax.quora.com"
+        ]
+      },
+      {
+        "@type": "EducationalOrganization",
+        "@id": "https://www.technsyntax.site/academy.html#academy",
+        "name": "Tech'nSyntax Academy",
+        "url": "https://www.technsyntax.site/academy.html",
+        "parentOrganization": { "@id": "https://www.technsyntax.site/#organization" },
+        "hasCourse": [
+          { "@type": "Course", "name": "Web Development", "description": "Build responsive, production-ready websites from scratch.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } },
+          { "@type": "Course", "name": "Data Analytics", "description": "Clean, structure and analyze real business datasets.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } },
+          { "@type": "Course", "name": "SQL", "description": "Query, join and manage relational data with confidence.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } },
+          { "@type": "Course", "name": "Power BI", "description": "Design dashboards that turn data into decisions.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } },
+          { "@type": "Course", "name": "AI Tools", "description": "Apply AI tools to automate everyday tasks and workflows.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } },
+          { "@type": "Course", "name": "UI/UX Design", "description": "Design usable, well-structured interfaces people enjoy using.", "provider": { "@id": "https://www.technsyntax.site/academy.html#academy" } }
+        ]
+      }
+    ]
+  }
+  </script>
+  <style>
+    .path-card { display: flex; flex-direction: column; height: 100%; }
+    .path-level {
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      color: var(--color-secondary);
+      background: rgba(6,182,212,0.08);
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 100px;
+      margin-bottom: var(--space-xs);
+      width: fit-content;
+    }
+    .benefit-row { display: flex; gap: 14px; align-items: flex-start; padding: var(--space-sm) 0; }
+    .benefit-num { font-family: var(--font-mono); color: var(--color-primary); font-weight: 700; font-size: var(--fs-md); flex-shrink: 0; }
+    .cert-panel {
+      background: var(--color-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg) var(--space-md);
+      color: #fff;
+      display: grid;
+      /* Mobile-first base: single stacked column, centered. Splits into
+         a text + badge row at 700px+, where both halves have room. */
+      grid-template-columns: 1fr;
+      text-align: center;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+    .cert-panel p { color: #94A3B8; }
+    .cert-badge {
+      font-family: var(--font-mono);
+      background: rgba(255,255,255,0.06);
+      border: 1px dashed rgba(255,255,255,0.3);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      text-align: center;
+      min-width: 200px;
+      margin: 0 auto;
+    }
+    .cert-badge .mark { font-size: 2rem; }
+    @media (min-width: 700px) {
+      .cert-panel { grid-template-columns: 1fr auto; text-align: left; padding: var(--space-xl); }
+      .cert-badge { margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="header">
+    <nav class="nav container" aria-label="Primary navigation">
+      <a href="index.html" class="logo">
+        <img src="icons/favicon.svg" alt="" class="logo-mark" width="34" height="34">
+        <span class="logo-text">Tech<span class="logo-dot">'n</span>Syntax</span>
+      </a>
+      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="portfolio.html">Portfolio</a></li>
+        <li><a href="academy.html" class="is-active">Academy</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-cta-mobile"><a href="contact.html" class="btn btn--primary btn--full">Start Project</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn--primary btn--sm">Start Project</a>
+      </div>
+    </nav>
+    <div class="nav-overlay"></div>
+  </header>
+
+  <main id="main">
+
+    <section class="page-header container">
+      <p class="breadcrumb"><a href="index.html">Home</a> / Academy</p>
+      <span class="eyebrow">academy.enroll()</span>
+      <h1>Tech'nSyntax Academy</h1>
+      <p class="section-head" style="margin-top:var(--space-sm);">Practical, instructor-built courses that turn technical curiosity into real, usable skill.</p>
+    </section>
+
+    <!-- Learning Paths -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">learning paths</span>
+          <h2>Choose a path, not just a course</h2>
+        </div>
+        <div class="grid grid--3">
+          <div class="card path-card reveal">
+            <span class="path-level">Beginner → Intermediate</span>
+            <h3>Web Development Path</h3>
+            <p>HTML, CSS and JavaScript fundamentals through to responsive, real-world builds.</p>
+          </div>
+          <div class="card path-card reveal">
+            <span class="path-level">Beginner → Advanced</span>
+            <h3>Data &amp; Analytics Path</h3>
+            <p>SQL, data cleaning and Power BI dashboards for business-ready reporting.</p>
+          </div>
+          <div class="card path-card reveal">
+            <span class="path-level">Intermediate</span>
+            <h3>AI Tools Path</h3>
+            <p>Practical use of AI tools for automation and everyday productivity.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Courses -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">courses</span>
+          <h2>All courses</h2>
+        </div>
+        <div class="grid grid--3">
+          <div class="card reveal"><h4>Web Development</h4><p>Build responsive, production-ready websites from scratch.</p></div>
+          <div class="card reveal"><h4>Data Analytics</h4><p>Clean, structure and analyze real business datasets.</p></div>
+          <div class="card reveal"><h4>SQL</h4><p>Query, join and manage relational data with confidence.</p></div>
+          <div class="card reveal"><h4>Power BI</h4><p>Design dashboards that turn data into decisions.</p></div>
+          <div class="card reveal"><h4>AI Tools</h4><p>Apply AI tools to automate everyday tasks and workflows.</p></div>
+          <div class="card reveal"><h4>UI/UX Design</h4><p>Design usable, well-structured interfaces people enjoy using.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="section">
+      <div class="container grid grid--2" style="gap: var(--space-xl); align-items: center;">
+        <div class="reveal">
+          <span class="eyebrow">why train with us</span>
+          <h2>Benefits of the Academy</h2>
+        </div>
+        <div class="reveal">
+          <div class="benefit-row">
+            <span class="benefit-num">01</span>
+            <div><h4>Practitioner instructors</h4><p>Taught by people who use these tools in real client work.</p></div>
+          </div>
+          <div class="benefit-row">
+            <span class="benefit-num">02</span>
+            <div><h4>Project-based learning</h4><p>Every course ends with something real you've built.</p></div>
+          </div>
+          <div class="benefit-row">
+            <span class="benefit-num">03</span>
+            <div><h4>Small cohorts</h4><p>Direct feedback instead of passive video-watching.</p></div>
+          </div>
+          <div class="benefit-row">
+            <span class="benefit-num">04</span>
+            <div><h4>Flexible scheduling</h4><p>Evening and weekend tracks for working professionals.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certification -->
+    <section class="section section--dark">
+      <div class="container">
+        <div class="cert-panel reveal">
+          <div>
+            <span class="eyebrow">certification</span>
+            <h2>A certificate that reflects real work, not attendance</h2>
+            <p>Every learning path ends with a project review. Pass it, and you receive a Tech'nSyntax Certificate of Completion you can add to your portfolio or resume.</p>
+            <a href="contact.html" class="btn btn--primary mt-lg">Enroll Now</a>
+          </div>
+          <div class="cert-badge">
+            <div class="mark">&lt;/&gt;</div>
+            <p style="color:#fff; margin:8px 0 0; font-size: var(--fs-sm);">Certificate of<br>Completion</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="index.html" class="logo">
+            <img src="icons/favicon.svg" alt="" class="logo-mark" width="34" height="34">
+            <span class="logo-text">Tech<span class="logo-dot">'n</span>Syntax</span>
+          </a>
+          <p class="footer-desc">Digital transformation services and practical technical education for growing businesses.</p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/TheTechnSyntax" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+            <a href="https://www.instagram.com/TheTechnSyntax" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+            <a href="https://www.x.com/TheTechnSyntax" aria-label="Twitter / X" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a>
+            <a href="https://www.youtube.com/@TheTechnSyntax" aria-label="YouTube" target="_blank" rel="noopener"><i class="fa-brands fa-youtube" aria-hidden="true"></i></a>
+            <a href="https://www.linkedin.com/company/TechnSyntax" aria-label="LinkedIn" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a>
+            <a href="https://www.reddit.com/r/TheTechnSyntax" aria-label="Reddit" target="_blank" rel="noopener"><i class="fa-brands fa-reddit-alien" aria-hidden="true"></i></a>
+            <a href="https://TheTechnSyntax.quora.com" aria-label="Quora" target="_blank" rel="noopener"><i class="fa-brands fa-quora" aria-hidden="true"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="services.html#web-development">Web Development</a></li>
+            <li><a href="services.html#data-analytics">Data Analytics</a></li>
+            <li><a href="services.html#ai-solutions">AI Solutions</a></li>
+            <li><a href="academy.html">Academy</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:info@technsyntax.site">info@technsyntax.site</a></li>
+            <li><span>Remote-first, worldwide</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span class="js-year">2026</span> Tech'nSyntax. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <button class="scroll-top" aria-label="Scroll to top">↑</button>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
