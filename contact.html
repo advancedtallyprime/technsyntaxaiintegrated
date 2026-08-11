@@ -166,14 +166,47 @@
           <h4 style="margin-top:0;">Chat with our AI Assistant</h4>
           <p style="margin-bottom: 1.5rem;">Tell us about your project and get an instant response — no form to fill out.</p>
 
-          <div id="ai-chat" class="ai-chat" data-agent-id="agent_7001kzp67vyqecjbgqvnzspb087r">
-            <div id="ai-chat-messages" class="ai-chat-messages" role="log" aria-live="polite"></div>
-            <div id="ai-chat-status" class="ai-chat-status"></div>
-            <form id="ai-chat-form" class="ai-chat-form">
-              <input type="text" id="ai-chat-input" class="ai-chat-input" placeholder="Type your message…" autocomplete="off" required>
-              <button type="submit" class="btn btn--primary ai-chat-send" aria-label="Send message">➤</button>
-            </form>
-          </div>
+<div id="ai-chat" class="ai-chat" data-agent-id="agent_7001kzp67vyqecjbgqvnzspb087r">
+
+  <div id="ai-chat-messages"
+       class="ai-chat-messages"
+       role="log"
+       aria-live="polite">
+  </div>
+
+  <div id="ai-chat-status"
+       class="ai-chat-status">
+  </div>
+
+  <form id="ai-chat-form" class="ai-chat-form">
+
+    <input
+      type="text"
+      id="ai-chat-input"
+      class="ai-chat-input"
+      placeholder="Type your message…"
+      autocomplete="off"
+      required
+    >
+
+    <button
+      type="submit"
+      class="btn btn--primary ai-chat-send"
+      aria-label="Send message">
+      ➤
+    </button>
+
+  </form>
+
+  <button
+    type="button"
+    id="ai-chat-end"
+    class="btn btn--secondary"
+    style="margin-top: 10px; width: 100%;">
+    End Chat
+  </button>
+
+</div>
         </div>
 
       </div>
