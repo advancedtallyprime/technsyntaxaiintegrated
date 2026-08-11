@@ -152,6 +152,23 @@
       document.getElementById('ai-chat-end');
 
     if (existing) {
+      /*
+       * The button already exists in the static HTML
+       * (contact.html). We still need to attach the click
+       * handler — just guard against binding it twice if
+       * createEndButton() gets called more than once.
+       */
+      if (!existing.dataset.aiChatBound) {
+        existing.addEventListener(
+          'click',
+          function () {
+            endConversation();
+          }
+        );
+
+        existing.dataset.aiChatBound = 'true';
+      }
+
       return existing;
     }
 
@@ -168,6 +185,8 @@
         endConversation();
       }
     );
+
+    button.dataset.aiChatBound = 'true';
 
     formEl.parentNode.insertBefore(
       button,
