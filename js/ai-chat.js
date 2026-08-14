@@ -1,23 +1,59 @@
 /**
- * Tech'nSyntax — Custom ElevenLabs AI Chat
+ * Tech'nSyntax — n8n AI Chat
  *
- * Text-only custom chat UI using ElevenLabs Agents WebSocket API.
+ * Frontend chatbot
+ * HTML/CSS UI remains the same.
  *
- * No ElevenLabs widget.
- * No API key in frontend.
- * Uses public agent ID.
+ * Architecture:
  *
- * IMPORTANT:
- * The conversation must actually end before ElevenLabs sends
- * the post-call transcription webhook.
+ * Contact.html
+ *      ↓
+ * ai-chat.js
+ *      ↓
+ * localStorage
+ *      ↓
+ * n8n Webhook
+ *      ↓
+ * AI Agent + Gemini
+ *      ↓
+ * Response
+ *      ↓
+ * ai-chat.js
+ *      ↓
+ * Chat UI
  */
 
 (function () {
   'use strict';
 
-  // ------------------------------------------------------------
+  // ============================================================
+  // CONFIGURATION
+  // ============================================================
+
+  /*
+   * IMPORTANT:
+   * Replace this with your FINAL n8n Production Webhook URL.
+   *
+   * Example:
+   * https://your-n8n-domain.com/webhook/technsyntax-chat
+   */
+  var N8N_WEBHOOK_URL =
+    'https://technsyntaxaichatbot.app.n8n.cloud/webhook/technsyntax-ai-chat-v2';
+
+
+  /*
+   * localStorage keys
+   */
+  var STORAGE_KEYS = {
+    USER_ID: 'technsyntax_ai_user_id',
+    PROFILE: 'technsyntax_ai_profile',
+    CONVERSATION: 'technsyntax_ai_conversation'
+  };
+
+
+  // ============================================================
   // DOM ELEMENTS
-  // ------------------------------------------------------------
+  // ============================================================
 
   var root = document.getElementById('ai-chat');
 
@@ -26,50 +62,57 @@
     return;
   }
 
-  var agentId = root.getAttribute('data-agent-id');
+  var messagesEl =
+    document.getElementById('ai-chat-messages');
 
-  var messagesEl = document.getElementById('ai-chat-messages');
-  var statusEl = document.getElementById('ai-chat-status');
-  var formEl = document.getElementById('ai-chat-form');
-  var inputEl = document.getElementById('ai-chat-input');
+  var statusEl =
+    document.getElementById('ai-chat-status');
 
-  if (!agentId) {
-    console.error('[AI Chat] Missing data-agent-id.');
+  var formEl =
+    document.getElementById('ai-chat-form');
+
+  var inputEl =
+    document.getElementById('ai-chat-input');
+
+  if (
+    !messagesEl ||
+    !statusEl ||
+    !formEl ||
+    !inputEl
+  ) {
+    console.error(
+      '[AI Chat] Required chat elements are missing.'
+    );
+
     return;
   }
 
-  if (!messagesEl || !statusEl || !formEl || !inputEl) {
-    console.error('[AI Chat] Required chat elements are missing.');
-    return;
-  }
+  var sendBtn =
+    formEl.querySelector('.ai-chat-send');
 
-  var sendBtn = formEl.querySelector('.ai-chat-send');
 
-  // ------------------------------------------------------------
+  // ============================================================
   // STATE
-  // ------------------------------------------------------------
+  // ============================================================
 
-  var socket = null;
-
-  var isConnected = false;
-  var isConnecting = false;
+  var isSending = false;
   var isEnding = false;
 
-  var reconnectTimer = null;
-  var reconnectAttempts = 0;
+  var userId = null;
 
-  var pendingMessages = [];
+  var userProfile = {};
+
+  var conversationHistory = [];
 
   var conversationId = null;
 
-  // Used to prevent duplicate agent messages.
-  var lastAgentResponseId = null;
 
-  // ------------------------------------------------------------
+  // ============================================================
   // STATUS
-  // ------------------------------------------------------------
+  // ============================================================
 
   function setStatus(text, isError) {
+
     statusEl.textContent = text || '';
 
     statusEl.classList.toggle(
@@ -78,25 +121,34 @@
     );
   }
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // SCROLL
-  // ------------------------------------------------------------
+  // ============================================================
 
   function scrollToBottom() {
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    messagesEl.scrollTop =
+      messagesEl.scrollHeight;
   }
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // ADD MESSAGE
-  // ------------------------------------------------------------
+  // ============================================================
 
   function addMessage(text, sender) {
-    if (!text) return null;
 
-    var bubble = document.createElement('div');
+    if (!text) {
+      return null;
+    }
+
+    var bubble =
+      document.createElement('div');
 
     bubble.className =
-      'ai-chat-bubble ai-chat-bubble--' + sender;
+      'ai-chat-bubble ai-chat-bubble--' +
+      sender;
 
     bubble.textContent = text;
 
@@ -107,19 +159,24 @@
     return bubble;
   }
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // TYPING INDICATOR
-  // ------------------------------------------------------------
+  // ============================================================
 
   function addTypingIndicator() {
+
     var existing =
-      messagesEl.querySelector('.ai-chat-typing');
+      messagesEl.querySelector(
+        '.ai-chat-typing'
+      );
 
     if (existing) {
       return existing;
     }
 
-    var el = document.createElement('div');
+    var el =
+      document.createElement('div');
 
     el.className =
       'ai-chat-bubble ai-chat-bubble--agent ai-chat-typing';
@@ -134,31 +191,37 @@
     return el;
   }
 
+
   function removeTypingIndicator() {
+
     var typing =
-      messagesEl.querySelector('.ai-chat-typing');
+      messagesEl.querySelector(
+        '.ai-chat-typing'
+      );
 
     if (typing) {
       typing.remove();
     }
   }
 
-  // ------------------------------------------------------------
-  // END CONVERSATION BUTTON
-  // ------------------------------------------------------------
+
+  // ============================================================
+  // END CHAT BUTTON
+  // ============================================================
 
   function createEndButton() {
+
     var existing =
-      document.getElementById('ai-chat-end');
+      document.getElementById(
+        'ai-chat-end'
+      );
 
     if (existing) {
-      /*
-       * The button already exists in the static HTML
-       * (contact.html). We still need to attach the click
-       * handler — just guard against binding it twice if
-       * createEndButton() gets called more than once.
-       */
-      if (!existing.dataset.aiChatBound) {
+
+      if (
+        !existing.dataset.aiChatBound
+      ) {
+
         existing.addEventListener(
           'click',
           function () {
@@ -166,18 +229,27 @@
           }
         );
 
-        existing.dataset.aiChatBound = 'true';
+        existing.dataset.aiChatBound =
+          'true';
       }
 
       return existing;
     }
 
-    var button = document.createElement('button');
+
+    var button =
+      document.createElement('button');
 
     button.type = 'button';
+
     button.id = 'ai-chat-end';
-    button.className = 'ai-chat-end';
-    button.textContent = 'End conversation';
+
+    button.className =
+      'ai-chat-end';
+
+    button.textContent =
+      'End conversation';
+
 
     button.addEventListener(
       'click',
@@ -186,632 +258,787 @@
       }
     );
 
-    button.dataset.aiChatBound = 'true';
+
+    button.dataset.aiChatBound =
+      'true';
+
 
     formEl.parentNode.insertBefore(
       button,
       formEl.nextSibling
     );
 
+
     return button;
   }
 
-  function setEndButtonVisible(visible) {
+
+  function setEndButtonVisible(
+    visible
+  ) {
+
     var button =
-      document.getElementById('ai-chat-end');
+      document.getElementById(
+        'ai-chat-end'
+      );
 
     if (!button) {
-      button = createEndButton();
+      button =
+        createEndButton();
     }
 
     button.style.display =
-      visible ? 'block' : 'none';
+      visible
+        ? 'block'
+        : 'none';
   }
 
-  // ------------------------------------------------------------
-  // WEBSOCKET URL
-  // ------------------------------------------------------------
 
-  function getWebSocketUrl() {
+  // ============================================================
+  // GENERATE USER ID
+  // ============================================================
+
+  function generateUserId() {
+
     return (
-      'wss://api.elevenlabs.io/v1/convai/conversation' +
-      '?agent_id=' +
-      encodeURIComponent(agentId)
+      'web_' +
+      Date.now() +
+      '_' +
+      Math.random()
+        .toString(36)
+        .substring(2, 12)
     );
   }
 
-  // ------------------------------------------------------------
-  // SEND JSON
-  // ------------------------------------------------------------
 
-  function sendSocketMessage(payload) {
-    if (
-      !socket ||
-      socket.readyState !== WebSocket.OPEN
-    ) {
-      return false;
-    }
+  // ============================================================
+  // GET / CREATE USER ID
+  // ============================================================
+
+  function initializeUserId() {
 
     try {
-      socket.send(JSON.stringify(payload));
-      return true;
-    } catch (error) {
-      console.error(
-        '[AI Chat] WebSocket send error:',
-        error
-      );
 
-      return false;
-    }
-  }
+      userId =
+        localStorage.getItem(
+          STORAGE_KEYS.USER_ID
+        );
 
-  // ------------------------------------------------------------
-  // CONNECTION
-  // ------------------------------------------------------------
 
-  function connect() {
-    if (isEnding) {
-      return;
-    }
+      if (!userId) {
 
-    if (isConnected || isConnecting) {
-      return;
-    }
+        userId =
+          generateUserId();
 
-    if (!agentId) {
-      setStatus(
-        'AI agent configuration is missing.',
-        true
-      );
-      return;
-    }
-
-    isConnecting = true;
-
-    setStatus('Connecting to AI assistant...');
-
-    if (sendBtn) {
-      sendBtn.disabled = true;
-    }
-
-    var wsUrl = getWebSocketUrl();
-
-    console.log(
-      '[AI Chat] Connecting to ElevenLabs...'
-    );
-
-    try {
-      socket = new WebSocket(wsUrl);
-    } catch (error) {
-      console.error(
-        '[AI Chat] WebSocket creation failed:',
-        error
-      );
-
-      isConnecting = false;
-
-      setStatus(
-        'Could not connect to AI assistant.',
-        true
-      );
-
-      scheduleReconnect();
-
-      return;
-    }
-
-    // ----------------------------------------------------------
-    // OPEN
-    // ----------------------------------------------------------
-
-    socket.onopen = function () {
-      console.log(
-        '[AI Chat] WebSocket connected.'
-      );
-
-      isConnected = true;
-      isConnecting = false;
-
-      reconnectAttempts = 0;
-
-      if (sendBtn) {
-        sendBtn.disabled = false;
-      }
-
-      setStatus('');
-
-      createEndButton();
-      setEndButtonVisible(true);
-
-      /*
-       * Start ElevenLabs conversation.
-       *
-       * We intentionally do not override the agent's
-       * first message here.
-       */
-
-      var initiationPayload = {
-        type: 'conversation_initiation_client_data'
-      };
-
-      /*
-       * Optional user ID.
-       *
-       * This creates a browser-session identifier which
-       * can also be useful later when processing the
-       * post-call webhook.
-       */
-
-      var storedUserId = null;
-
-      try {
-        storedUserId =
-          sessionStorage.getItem(
-            'technsyntax_ai_user_id'
-          );
-
-        if (!storedUserId) {
-          storedUserId =
-            'web_' +
-            Date.now() +
-            '_' +
-            Math.random()
-              .toString(36)
-              .substring(2, 10);
-
-          sessionStorage.setItem(
-            'technsyntax_ai_user_id',
-            storedUserId
-          );
-        }
-      } catch (error) {
-        console.warn(
-          '[AI Chat] Could not access sessionStorage.'
+        localStorage.setItem(
+          STORAGE_KEYS.USER_ID,
+          userId
         );
       }
 
-      initiationPayload.user_id = storedUserId;
 
-      sendSocketMessage(
-        initiationPayload
+    } catch (error) {
+
+      console.warn(
+        '[AI Chat] localStorage unavailable.',
+        error
       );
 
-      // Flush messages typed before connection.
-      while (
-        pendingMessages.length > 0 &&
-        isConnected &&
-        socket &&
-        socket.readyState === WebSocket.OPEN
+      /*
+       * Fallback:
+       * Generate temporary ID.
+       */
+
+      userId =
+        generateUserId();
+    }
+  }
+
+
+  // ============================================================
+  // LOAD USER PROFILE
+  // ============================================================
+
+  function loadUserProfile() {
+
+    try {
+
+      var storedProfile =
+        localStorage.getItem(
+          STORAGE_KEYS.PROFILE
+        );
+
+
+      if (storedProfile) {
+
+        userProfile =
+          JSON.parse(
+            storedProfile
+          );
+
+      } else {
+
+        userProfile = {};
+      }
+
+
+    } catch (error) {
+
+      console.warn(
+        '[AI Chat] Could not load user profile.',
+        error
+      );
+
+      userProfile = {};
+    }
+  }
+
+
+  // ============================================================
+  // SAVE USER PROFILE
+  // ============================================================
+
+  function saveUserProfile(
+    profile
+  ) {
+
+    if (!profile) {
+      return;
+    }
+
+
+    userProfile =
+      Object.assign(
+        {},
+        userProfile,
+        profile
+      );
+
+
+    try {
+
+      localStorage.setItem(
+        STORAGE_KEYS.PROFILE,
+        JSON.stringify(
+          userProfile
+        )
+      );
+
+    } catch (error) {
+
+      console.warn(
+        '[AI Chat] Could not save user profile.',
+        error
+      );
+    }
+  }
+
+
+  // ============================================================
+  // LOAD CONVERSATION
+  // ============================================================
+
+  function loadConversation() {
+
+    try {
+
+      var storedConversation =
+        localStorage.getItem(
+          STORAGE_KEYS.CONVERSATION
+        );
+
+
+      if (
+        storedConversation
       ) {
-        var message =
-          pendingMessages.shift();
 
-        sendSocketMessage({
-          type: 'user_message',
-          text: message
-        });
-      }
-    };
+        conversationHistory =
+          JSON.parse(
+            storedConversation
+          );
 
-    // ----------------------------------------------------------
-    // MESSAGE
-    // ----------------------------------------------------------
 
-    socket.onmessage = function (event) {
-      var data;
+        if (
+          !Array.isArray(
+            conversationHistory
+          )
+        ) {
 
-      try {
-        data = JSON.parse(event.data);
-      } catch (error) {
-        console.warn(
-          '[AI Chat] Received non-JSON message:',
-          event.data
-        );
+          conversationHistory =
+            [];
+        }
 
-        return;
+      } else {
+
+        conversationHistory =
+          [];
       }
 
-      console.log(
-        '[AI Chat] ElevenLabs event:',
-        data
-      );
 
-      switch (data.type) {
+    } catch (error) {
 
-        // ------------------------------------------------------
-        // CONVERSATION STARTED
-        // ------------------------------------------------------
-
-        case 'conversation_initiation_metadata': {
-
-          var metadata =
-            data.conversation_initiation_metadata_event;
-
-          if (
-            metadata &&
-            metadata.conversation_id
-          ) {
-            conversationId =
-              metadata.conversation_id;
-
-            root.setAttribute(
-              'data-conversation-id',
-              conversationId
-            );
-
-            console.log(
-              '[AI Chat] Conversation ID:',
-              conversationId
-            );
-          }
-
-          removeTypingIndicator();
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // USER TRANSCRIPT
-        // ------------------------------------------------------
-
-        case 'user_transcript': {
-
-          var userTranscript =
-            data.user_transcription_event &&
-            data.user_transcription_event
-              .user_transcript;
-
-          /*
-           * The user message is already displayed
-           * immediately when submitMessage() runs.
-           *
-           * Therefore we do NOT display it again here.
-           */
-
-          console.log(
-            '[AI Chat] User transcript:',
-            userTranscript
-          );
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // AGENT RESPONSE
-        // ------------------------------------------------------
-
-        case 'agent_response': {
-
-          removeTypingIndicator();
-
-          var agentEvent =
-            data.agent_response_event;
-
-          if (!agentEvent) {
-            break;
-          }
-
-          var responseText =
-            agentEvent.agent_response;
-
-          var responseId =
-            agentEvent.response_id ||
-            agentEvent.event_id ||
-            null;
-
-          if (
-            responseId &&
-            responseId === lastAgentResponseId
-          ) {
-            break;
-          }
-
-          lastAgentResponseId =
-            responseId;
-
-          if (responseText) {
-            addMessage(
-              responseText,
-              'agent'
-            );
-          }
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // AGENT RESPONSE CORRECTION
-        // ------------------------------------------------------
-
-        case 'agent_response_correction': {
-
-          var correction =
-            data.agent_response_correction_event;
-
-          if (!correction) {
-            break;
-          }
-
-          var correctedText =
-            correction
-              .corrected_agent_response;
-
-          if (!correctedText) {
-            break;
-          }
-
-          /*
-           * Find the latest agent bubble.
-           */
-
-          var agentBubbles =
-            messagesEl.querySelectorAll(
-              '.ai-chat-bubble--agent'
-            );
-
-          if (agentBubbles.length > 0) {
-
-            var lastBubble =
-              agentBubbles[
-                agentBubbles.length - 1
-              ];
-
-            /*
-             * Don't replace typing indicator.
-             */
-
-            if (
-              !lastBubble.classList.contains(
-                'ai-chat-typing'
-              )
-            ) {
-              lastBubble.textContent =
-                correctedText;
-            }
-          }
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // STREAMING CHAT PART
-        // ------------------------------------------------------
-
-        case 'agent_chat_response_part': {
-
-          /*
-           * Some ElevenLabs configurations may send
-           * streaming response parts.
-           *
-           * We don't render partial chunks because the
-           * completed agent_response event gives us a
-           * clean final message.
-           */
-
-          addTypingIndicator();
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // PING
-        // ------------------------------------------------------
-
-        case 'ping': {
-
-          var pingEvent =
-            data.ping_event;
-
-          if (!pingEvent) {
-            break;
-          }
-
-          var eventId =
-            pingEvent.event_id;
-
-          var pingMs =
-            pingEvent.ping_ms || 0;
-
-          setTimeout(
-            function () {
-
-              if (
-                socket &&
-                socket.readyState ===
-                  WebSocket.OPEN
-              ) {
-
-                sendSocketMessage({
-                  type: 'pong',
-                  event_id: eventId
-                });
-
-              }
-
-            },
-            pingMs
-          );
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // CLIENT ERROR
-        // ------------------------------------------------------
-
-        case 'client_error': {
-
-          console.error(
-            '[AI Chat] ElevenLabs client error:',
-            data
-          );
-
-          removeTypingIndicator();
-
-          setStatus(
-            'ElevenLabs returned an error. Please try again.',
-            true
-          );
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // INTERRUPTION
-        // ------------------------------------------------------
-
-        case 'interruption': {
-
-          removeTypingIndicator();
-
-          console.log(
-            '[AI Chat] Agent response interrupted.'
-          );
-
-          break;
-        }
-
-        // ------------------------------------------------------
-        // UNKNOWN EVENT
-        // ------------------------------------------------------
-
-        default: {
-
-          /*
-           * Keep logging unknown events while debugging.
-           */
-
-          console.log(
-            '[AI Chat] Unhandled event:',
-            data.type
-          );
-
-          break;
-        }
-      }
-    };
-
-    // ----------------------------------------------------------
-    // ERROR
-    // ----------------------------------------------------------
-
-    socket.onerror = function (error) {
-
-      console.error(
-        '[AI Chat] WebSocket error:',
+      console.warn(
+        '[AI Chat] Could not load conversation.',
         error
       );
 
-      isConnected = false;
-
-      removeTypingIndicator();
-
-      if (!isEnding) {
-        setStatus(
-          'Connection problem. Retrying...',
-          true
-        );
-      }
-    };
-
-    // ----------------------------------------------------------
-    // CLOSE
-    // ----------------------------------------------------------
-
-    socket.onclose = function (event) {
-
-      console.log(
-        '[AI Chat] WebSocket closed.',
-        event.code,
-        event.reason
-      );
-
-      isConnected = false;
-      isConnecting = false;
-
-      socket = null;
-
-      removeTypingIndicator();
-
-      if (sendBtn) {
-        sendBtn.disabled = true;
-      }
-
-      if (isEnding) {
-
-        setStatus(
-          'Conversation ended.'
-        );
-
-        setEndButtonVisible(false);
-
-        /*
-         * IMPORTANT:
-         *
-         * We do not reconnect after the user explicitly
-         * ends the conversation.
-         */
-
-        return;
-      }
-
-      setStatus(
-        'Connection closed. Reconnecting...',
-        true
-      );
-
-      scheduleReconnect();
-    };
+      conversationHistory = [];
+    }
   }
 
-  // ------------------------------------------------------------
-  // RECONNECT
-  // ------------------------------------------------------------
 
-  function scheduleReconnect() {
+  // ============================================================
+  // SAVE CONVERSATION
+  // ============================================================
 
-    if (isEnding) {
-      return;
-    }
+  function saveConversation() {
 
-    if (reconnectTimer) {
-      return;
-    }
+    try {
 
-    reconnectAttempts++;
+      /*
+       * Keep browser storage reasonably small.
+       *
+       * The complete conversation should ultimately
+       * be handled by n8n/AI memory.
+       */
 
-    var delay =
-      Math.min(
-        1000 *
-          Math.pow(
-            2,
-            reconnectAttempts - 1
-          ),
-        10000
+      var limitedHistory =
+        conversationHistory.slice(
+          -30
+        );
+
+
+      localStorage.setItem(
+        STORAGE_KEYS.CONVERSATION,
+        JSON.stringify(
+          limitedHistory
+        )
       );
 
-    reconnectTimer =
-      setTimeout(
-        function () {
 
-          reconnectTimer = null;
+    } catch (error) {
 
-          connect();
-
-        },
-        delay
+      console.warn(
+        '[AI Chat] Could not save conversation.',
+        error
       );
+    }
   }
 
-  // ------------------------------------------------------------
-  // SEND MESSAGE
-  // ------------------------------------------------------------
 
-  function sendMessage(text) {
+  // ============================================================
+  // ADD TO LOCAL CONVERSATION
+  // ============================================================
+
+  function addToConversation(
+    role,
+    text
+  ) {
 
     if (!text) {
       return;
     }
+
+
+    conversationHistory.push({
+
+      role: role,
+
+      content: text,
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+
+    saveConversation();
+  }
+
+
+  // ============================================================
+  // BUILD PROFILE FOR N8N
+  // ============================================================
+
+  function buildProfilePayload() {
+
+    return {
+
+      userId: userId,
+
+      name:
+        userProfile.name || '',
+
+      contact:
+        userProfile.contact || '',
+
+      email:
+        userProfile.email || '',
+
+      service:
+        userProfile.service || '',
+
+      requirement:
+        userProfile.requirement || '',
+
+      budget:
+        userProfile.budget || '',
+
+      timeline:
+        userProfile.timeline || '',
+
+      lastTopic:
+        userProfile.lastTopic || '',
+
+      lastSummary:
+        userProfile.lastSummary || '',
+
+      leadStatus:
+        userProfile.leadStatus || ''
+
+    };
+  }
+
+
+  // ============================================================
+  // BUILD REQUEST
+  // ============================================================
+
+  function buildRequestPayload(
+    message
+  ) {
+
+    return {
+
+      /*
+       * Identity
+       */
+
+      userId:
+        userId,
+
+
+      /*
+       * Returning user
+       */
+
+      returningUser:
+        Object.keys(
+          userProfile
+        ).length > 0,
+
+
+      /*
+       * Customer profile
+       */
+
+      profile:
+        buildProfilePayload(),
+
+
+      /*
+       * Current message
+       */
+
+      message:
+        message,
+
+
+      /*
+       * Conversation ID
+       *
+       * n8n can create its own conversation ID
+       * if this is null.
+       */
+
+      conversationId:
+        conversationId,
+
+
+      /*
+       * Browser conversation context
+       *
+       * This is useful for the first version.
+       *
+       * Later, n8n AI Memory can become the
+       * primary conversation memory.
+       */
+
+      conversation:
+        conversationHistory.slice(
+          -20
+        ),
+
+
+      /*
+       * Client information
+       */
+
+      client: {
+
+        page:
+          window.location.href,
+
+        pageTitle:
+          document.title,
+
+        userAgent:
+          navigator.userAgent,
+
+        language:
+          navigator.language || '',
+
+        timezone:
+          Intl.DateTimeFormat()
+            .resolvedOptions()
+            .timeZone || '',
+
+        timestamp:
+          new Date().toISOString()
+
+      }
+
+    };
+  }
+
+
+  // ============================================================
+  // UPDATE PROFILE FROM N8N RESPONSE
+  // ============================================================
+
+  function updateProfileFromResponse(
+    response
+  ) {
+
+    if (!response) {
+      return;
+    }
+
+
+    /*
+     * We expect n8n to eventually return:
+     *
+     * response.profile
+     *
+     * Example:
+     *
+     * {
+     *   name: "Rahul",
+     *   contact: "98xxxx",
+     *   service: "Web Development"
+     * }
+     */
+
+
+    if (
+      response.profile &&
+      typeof response.profile ===
+        'object'
+    ) {
+
+      saveUserProfile(
+        response.profile
+      );
+    }
+
+
+    /*
+     * Also support top-level fields.
+     */
+
+    var profileUpdate = {};
+
+
+    if (response.name) {
+
+      profileUpdate.name =
+        response.name;
+    }
+
+
+    if (response.contact) {
+
+      profileUpdate.contact =
+        response.contact;
+    }
+
+
+    if (response.email) {
+
+      profileUpdate.email =
+        response.email;
+    }
+
+
+    if (response.service) {
+
+      profileUpdate.service =
+        response.service;
+    }
+
+
+    if (response.requirement) {
+
+      profileUpdate.requirement =
+        response.requirement;
+    }
+
+
+    if (response.budget) {
+
+      profileUpdate.budget =
+        response.budget;
+    }
+
+
+    if (response.timeline) {
+
+      profileUpdate.timeline =
+        response.timeline;
+    }
+
+
+    if (response.summary) {
+
+      profileUpdate.lastSummary =
+        response.summary;
+    }
+
+
+    if (response.leadStatus) {
+
+      profileUpdate.leadStatus =
+        response.leadStatus;
+    }
+
+
+    if (
+      Object.keys(
+        profileUpdate
+      ).length > 0
+    ) {
+
+      saveUserProfile(
+        profileUpdate
+      );
+    }
+
+
+    /*
+     * Conversation ID returned by n8n.
+     */
+
+    if (
+      response.conversationId
+    ) {
+
+      conversationId =
+        response.conversationId;
+
+
+      root.setAttribute(
+        'data-conversation-id',
+        conversationId
+      );
+    }
+  }
+
+
+  // ============================================================
+  // NORMALIZE N8N RESPONSE
+  // ============================================================
+
+  function extractReply(
+    data
+  ) {
+
+    if (!data) {
+      return '';
+    }
+
+
+    /*
+     * Most preferred:
+     *
+     * {
+     *   reply: "Hello Rahul"
+     * }
+     */
+
+    if (
+      typeof data.reply ===
+      'string'
+    ) {
+
+      return data.reply;
+    }
+
+
+    /*
+     * Alternative:
+     *
+     * {
+     *   response: "Hello"
+     * }
+     */
+
+    if (
+      typeof data.response ===
+      'string'
+    ) {
+
+      return data.response;
+    }
+
+
+    /*
+     * Alternative:
+     *
+     * {
+     *   message: "Hello"
+     * }
+     */
+
+    if (
+      typeof data.message ===
+      'string'
+    ) {
+
+      return data.message;
+    }
+
+
+    /*
+     * Some n8n workflows may return:
+     *
+     * {
+     *   output: "Hello"
+     * }
+     */
+
+    if (
+      typeof data.output ===
+      'string'
+    ) {
+
+      return data.output;
+    }
+
+
+    return '';
+  }
+
+
+  // ============================================================
+  // SEND REQUEST TO N8N
+  // ============================================================
+
+  async function sendToN8N(
+    message
+  ) {
+
+    /*
+     * Don't accidentally send without configuration.
+     */
+
+    if (
+      !N8N_WEBHOOK_URL ||
+      N8N_WEBHOOK_URL ===
+        'YOUR_N8N_WEBHOOK_URL_HERE'
+    ) {
+
+      throw new Error(
+        'n8n Webhook URL is not configured.'
+      );
+    }
+
+
+    var payload =
+      buildRequestPayload(
+        message
+      );
+
+
+    console.log(
+      '[AI Chat] Sending request to n8n:',
+      payload
+    );
+
+
+    var response =
+      await fetch(
+        N8N_WEBHOOK_URL,
+        {
+
+          method: 'POST',
+
+          headers: {
+
+            'Content-Type':
+              'application/json',
+
+            'Accept':
+              'application/json'
+
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+
+        }
+      );
+
+
+    /*
+     * HTTP error
+     */
+
+    if (!response.ok) {
+
+      throw new Error(
+        'n8n returned HTTP ' +
+        response.status
+      );
+    }
+
+
+    /*
+     * Parse JSON
+     */
+
+    var data =
+      await response.json();
+
+
+    console.log(
+      '[AI Chat] n8n response:',
+      data
+    );
+
+
+    return data;
+  }
+
+
+  // ============================================================
+  // SEND MESSAGE
+  // ============================================================
+
+  async function sendMessage(
+    text
+  ) {
+
+    if (
+      !text ||
+      isSending ||
+      isEnding
+    ) {
+
+      return;
+    }
+
 
     /*
      * Display user message immediately.
@@ -822,44 +1049,167 @@
       'user'
     );
 
+
+    /*
+     * Save local conversation.
+     */
+
+    addToConversation(
+      'user',
+      text
+    );
+
+
+    /*
+     * Clear input.
+     */
+
+    inputEl.value = '';
+
+
+    /*
+     * Show typing.
+     */
+
     addTypingIndicator();
 
+
     /*
-     * Send immediately if connected.
+     * Lock send button.
      */
 
-    if (
-      isConnected &&
-      socket &&
-      socket.readyState ===
-        WebSocket.OPEN
-    ) {
+    isSending = true;
 
-      var sent =
-        sendSocketMessage({
-          type: 'user_message',
-          text: text
-        });
 
-      if (!sent) {
-        pendingMessages.push(text);
-      }
+    if (sendBtn) {
 
-      return;
+      sendBtn.disabled =
+        true;
     }
 
-    /*
-     * Otherwise queue it.
-     */
 
-    pendingMessages.push(text);
+    setStatus(
+      'AI is thinking...'
+    );
 
-    connect();
+
+    try {
+
+      /*
+       * Send to n8n.
+       */
+
+      var data =
+        await sendToN8N(
+          text
+        );
+
+
+      /*
+       * Remove typing.
+       */
+
+      removeTypingIndicator();
+
+
+      /*
+       * Update customer profile
+       * from n8n.
+       */
+
+      updateProfileFromResponse(
+        data
+      );
+
+
+      /*
+       * Get AI response.
+       */
+
+      var reply =
+        extractReply(
+          data
+        );
+
+
+      if (!reply) {
+
+        throw new Error(
+          'n8n returned an empty AI response.'
+        );
+      }
+
+
+      /*
+       * Display AI response.
+       */
+
+      addMessage(
+        reply,
+        'agent'
+      );
+
+
+      /*
+       * Save AI response locally.
+       */
+
+      addToConversation(
+        'agent',
+        reply
+      );
+
+
+      /*
+       * Clear status.
+       */
+
+      setStatus('');
+
+
+    } catch (error) {
+
+      console.error(
+        '[AI Chat] n8n request failed:',
+        error
+      );
+
+
+      removeTypingIndicator();
+
+
+      addMessage(
+        'Sorry, I am having trouble connecting right now. Please try again in a moment.',
+        'agent'
+      );
+
+
+      setStatus(
+        'Connection problem. Please try again.',
+        true
+      );
+
+
+    } finally {
+
+      isSending = false;
+
+
+      if (sendBtn) {
+
+        sendBtn.disabled =
+          false;
+      }
+
+
+      inputEl.focus();
+    }
   }
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // END CONVERSATION
-  // ------------------------------------------------------------
+  // ============================================================
 
   function endConversation() {
 
@@ -867,72 +1217,98 @@
       return;
     }
 
+
     isEnding = true;
 
-    if (reconnectTimer) {
-      clearTimeout(
-        reconnectTimer
-      );
-
-      reconnectTimer = null;
-    }
 
     removeTypingIndicator();
 
-    setStatus(
-      'Ending conversation...'
-    );
 
     if (sendBtn) {
-      sendBtn.disabled = true;
+
+      sendBtn.disabled =
+        true;
     }
 
-    setEndButtonVisible(false);
+
+    setEndButtonVisible(
+      false
+    );
+
 
     /*
-     * IMPORTANT:
+     * We don't delete localStorage here.
      *
-     * Closing the WebSocket tells the server that the
-     * browser-side conversation has ended.
+     * This is intentional.
      *
-     * ElevenLabs can then process the completed conversation
-     * and send the post_call_transcription webhook.
+     * The browser should remember the user
+     * for their next visit.
      */
 
-    if (
-      socket &&
-      socket.readyState ===
-        WebSocket.OPEN
-    ) {
 
-      try {
+    setStatus(
+      'Conversation ended.'
+    );
 
-        socket.close(
-          1000,
-          'User ended conversation'
-        );
 
-      } catch (error) {
+    /*
+     * Optional:
+     *
+     * In the future we can send an explicit
+     * "conversation_end" event to n8n.
+     *
+     * That can trigger final summary processing.
+     */
 
-        console.error(
-          '[AI Chat] Error closing socket:',
-          error
-        );
 
+    console.log(
+      '[AI Chat] Conversation ended.',
+      {
+        userId:
+          userId,
+
+        conversationId:
+          conversationId
       }
+    );
+  }
 
-    } else {
 
-      setStatus(
-        'Conversation ended.'
+  // ============================================================
+  // CLEAR LOCAL CONVERSATION
+  // ============================================================
+
+  /*
+   * This function is intentionally NOT connected
+   * to the UI yet.
+   *
+   * Later we can add a "New Chat" button.
+   */
+
+  function clearLocalConversation() {
+
+    conversationHistory =
+      [];
+
+    try {
+
+      localStorage.removeItem(
+        STORAGE_KEYS.CONVERSATION
       );
 
+    } catch (error) {
+
+      console.warn(
+        '[AI Chat] Could not clear conversation.',
+        error
+      );
     }
   }
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // FORM SUBMIT
-  // ------------------------------------------------------------
+  // ============================================================
 
   formEl.addEventListener(
     'submit',
@@ -940,28 +1316,35 @@
 
       event.preventDefault();
 
-      if (isEnding) {
+
+      if (
+        isEnding ||
+        isSending
+      ) {
+
         return;
       }
 
+
       var text =
         inputEl.value.trim();
+
 
       if (!text) {
         return;
       }
 
-      sendMessage(text);
 
-      inputEl.value = '';
-
-      inputEl.focus();
+      sendMessage(
+        text
+      );
     }
   );
 
-  // ------------------------------------------------------------
+
+  // ============================================================
   // ENTER KEY
-  // ------------------------------------------------------------
+  // ============================================================
 
   inputEl.addEventListener(
     'keydown',
@@ -979,42 +1362,119 @@
     }
   );
 
-  // ------------------------------------------------------------
-  // PAGE UNLOAD
-  // ------------------------------------------------------------
 
-  window.addEventListener(
-    'beforeunload',
-    function () {
+  // ============================================================
+  // INITIALIZE
+  // ============================================================
 
-      if (
-        socket &&
-        socket.readyState ===
-          WebSocket.OPEN
-      ) {
+  function initialize() {
 
-        try {
-          socket.close(
-            1000,
-            'Page closed'
-          );
-        } catch (error) {
-          // Ignore unload errors.
-        }
+    console.log(
+      '[AI Chat] Initializing n8n chatbot...'
+    );
 
+
+    /*
+     * User identity
+     */
+
+    initializeUserId();
+
+
+    /*
+     * Load profile
+     */
+
+    loadUserProfile();
+
+
+    /*
+     * Load local conversation
+     */
+
+    loadConversation();
+
+
+    /*
+     * End button
+     */
+
+    createEndButton();
+
+
+    setEndButtonVisible(
+      true
+    );
+
+
+    /*
+     * Store user ID on root element.
+     */
+
+    root.setAttribute(
+      'data-user-id',
+      userId
+    );
+
+
+    /*
+     * Returning user information
+     */
+
+    var returningUser =
+      Object.keys(
+        userProfile
+      ).length > 0;
+
+
+    console.log(
+      '[AI Chat] User initialized:',
+      {
+        userId:
+          userId,
+
+        returningUser:
+          returningUser,
+
+        profile:
+          userProfile
       }
+    );
 
+
+    /*
+     * We DO NOT connect to anything here.
+     *
+     * Unlike ElevenLabs WebSocket,
+     * n8n is request-based.
+     *
+     * The connection/request happens
+     * only when the user sends a message.
+     */
+
+    setStatus('');
+
+
+    /*
+     * Optional welcome context.
+     */
+
+    if (returningUser) {
+
+      console.log(
+        '[AI Chat] Returning user detected.'
+      );
     }
-  );
 
-  // ------------------------------------------------------------
-  // START CHAT
-  // ------------------------------------------------------------
 
-  createEndButton();
+    inputEl.focus();
+  }
 
-  setEndButtonVisible(false);
 
-  connect();
+  // ============================================================
+  // START
+  // ============================================================
+
+  initialize();
 
 })();
