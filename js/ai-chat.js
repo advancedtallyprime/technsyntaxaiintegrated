@@ -6,6 +6,8 @@
    * Tech'nSyntax AI Chat Assistant
    * ============================================================
    *
+   * Inline chat section (replaces the contact form on contact.html).
+   *
    * n8n Webhook:
    * https://technsyntaxaichatbot.app.n8n.cloud/webhook/chat
    *
@@ -61,15 +63,6 @@
      GET DOM ELEMENTS
      ------------------------------------------------------------ */
 
-  const chatbot =
-    document.getElementById("tnsChatbot");
-
-  const toggleButton =
-    document.getElementById("tnsChatToggle");
-
-  const closeButton =
-    document.getElementById("tnsChatClose");
-
   const messagesContainer =
     document.getElementById("tnsChatMessages");
 
@@ -85,9 +78,6 @@
      ------------------------------------------------------------ */
 
   if (
-    !chatbot ||
-    !toggleButton ||
-    !closeButton ||
     !messagesContainer ||
     !input ||
     !sendButton
@@ -97,42 +87,6 @@
     );
 
     return;
-  }
-
-
-  /* ------------------------------------------------------------
-     OPEN CHAT
-     ------------------------------------------------------------ */
-
-  function openChat() {
-
-    chatbot.classList.add("is-open");
-
-    toggleButton.setAttribute(
-      "aria-expanded",
-      "true"
-    );
-
-    setTimeout(function () {
-      input.focus();
-    }, 50);
-  }
-
-
-  /* ------------------------------------------------------------
-     CLOSE CHAT
-     ------------------------------------------------------------ */
-
-  function closeChat() {
-
-    chatbot.classList.remove("is-open");
-
-    toggleButton.setAttribute(
-      "aria-expanded",
-      "false"
-    );
-
-    toggleButton.focus();
   }
 
 
@@ -373,13 +327,6 @@
 
 
     /*
-     * Make sure chat is open.
-     */
-
-    openChat();
-
-
-    /*
      * Show user's message immediately.
      */
 
@@ -589,30 +536,6 @@
 
 
   /*
-   * Open chatbot.
-   */
-
-  toggleButton.addEventListener(
-    "click",
-    function () {
-      openChat();
-    }
-  );
-
-
-  /*
-   * Close chatbot.
-   */
-
-  closeButton.addEventListener(
-    "click",
-    function () {
-      closeChat();
-    }
-  );
-
-
-  /*
    * Send button.
    */
 
@@ -655,27 +578,6 @@
     "input",
     function () {
       autoGrowInput();
-    }
-  );
-
-
-  /*
-   * Escape closes chatbot.
-   */
-
-  document.addEventListener(
-    "keydown",
-    function (event) {
-
-      if (
-        event.key === "Escape" &&
-        chatbot.classList.contains(
-          "is-open"
-        )
-      ) {
-
-        closeChat();
-      }
     }
   );
 
